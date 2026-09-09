@@ -1,0 +1,9 @@
+MED known-answer tests
+
+        'same' -> 'same'       expected 0 got 0  PASS
+            '' -> 'nlp'        expected 3 got 3  PASS
+      'kitten' -> 'sitting'    expected 3 got 3  PASS
+        'flaw' -> 'lawn'       expected 2 got 2  PASS
+   'intention' -> 'execution'  expected 5 got 5  PASS
+
+normalized_med('kitten','sitting') = 0.5000

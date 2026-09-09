@@ -1,0 +1,3 @@
+ea4000263044ca1f53f56924ff4bb89eaf89623c3cfb5ef01334d5fd7fd7e937  slice.jsonl
+selection_rule: first 500 train lines that, after strip(), are non-empty, not '= ...' headings, and 40-600 characters long
+count: 500

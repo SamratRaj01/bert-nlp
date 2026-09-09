@@ -1,0 +1,12 @@
+[PASS] same seed reproduces the same noise and log
+[PASS] intensity 0 returns the source and MED 0
+[PASS] recorded edits reproduce the noisy output (all 20 pairs)
+[PASS] clean and noisy branches share one tokenizer configuration
+[PASS] at least one pair shows a meaningful WordPiece change
+[PASS] raw files checksummed and unchanged
+[PASS] slice is checksummed
+[PASS] 20 paired records written (jsonl + csv + md)
+[PASS] tokenizer data card written
+[PASS] corpus data card written
+[PASS] clean baseline persisted
+[PASS] all unit tests pass

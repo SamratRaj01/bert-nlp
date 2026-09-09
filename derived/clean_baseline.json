@@ -1,0 +1,13 @@
+{
+  "n_examples": 500,
+  "checkpoint": "bert-base-uncased",
+  "checkpoint_revision": "86b5e0934494bd15c9632b12f734a8a67f723594",
+  "max_length": 512,
+  "mean_tokens": 70.284,
+  "max_tokens": 166,
+  "mean_fertility": 1.1344555376670404,
+  "mean_continuation_rate": 0.07687349666630314,
+  "mean_unk_rate": 0.0,
+  "total_unk": 0,
+  "truncated_examples": 0
+}

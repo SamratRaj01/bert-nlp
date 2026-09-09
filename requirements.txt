@@ -1,0 +1,13 @@
+# Phase 1 environment. Exact resolved versions are in requirements.lock.txt.
+# Phase 1 needs only the tokenizer, not the model weights, so torch is intentionally omitted
+# (add it in Phase 2 for the BERT forward pass).
+datasets>=2.18
+transformers>=4.40
+tokenizers>=0.19
+pytest>=8.0
+pyyaml>=6.0
+# notebook entry point (phase1.ipynb)
+jupyter>=1.0
+nbformat>=5.9
+nbconvert>=7.0
+ipykernel>=6.29

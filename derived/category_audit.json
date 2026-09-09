@@ -1,0 +1,23 @@
+{
+  "n_examples": 500,
+  "total_characters": 167391,
+  "non_ascii_characters": 216,
+  "by_category": {
+    "uppercase": 5973,
+    "lowercase": 122037,
+    "digit": 3148,
+    "punctuation": 5373,
+    "whitespace": 30839,
+    "symbol": 20,
+    "other": 1
+  },
+  "shares": {
+    "uppercase": 0.03568292202089718,
+    "lowercase": 0.7290535333440866,
+    "digit": 0.018806267959448238,
+    "punctuation": 0.0320984999193505,
+    "whitespace": 0.18423332198266335,
+    "symbol": 0.0001194807367182226,
+    "other": 5.97403683591113e-06
+  }
+}

@@ -1,0 +1,33 @@
+# Phase 1 active configuration. See configs/README.md for field meanings.
+global_seed: 620
+
+checkpoint: bert-base-uncased
+checkpoint_revision: 86b5e0934494bd15c9632b12f734a8a67f723594
+max_length: 512
+
+corpus:
+  dataset: Salesforce/wikitext        # legacy id "wikitext" fails on datasets>=5; use this
+  config: wikitext-2-raw-v1           # raw variant keeps original characters
+  revision: b08601e04326c79dfdd32d625aee71d232d685c3
+  split: train
+  slice_rule: "first 500 train lines that, after strip(), are non-empty, not '= ...' headings, and 40-600 characters long"
+  slice_size: 500
+  slice_min_chars: 40
+  slice_max_chars: 600
+
+noise:
+  operations: [insertion, deletion, substitution]
+  intensity: 0.05                     # per-character Bernoulli probability (see src/noise/README.md)
+  alphabet: "abcdefghijklmnopqrstuvwxyz"
+
+pairs:
+  count: 20
+  selection_rule: "first 20 examples of the slice; operation/intensity varied per pairs plan"
+
+# Environment captured at setup (2026-09-08); full pins in requirements.lock.txt
+env:
+  python: "3.13.11"
+  transformers: "5.16.1"
+  datasets: "5.0.1"
+  tokenizers: "0.23.2"
+  huggingface_hub: "1.30.0"
