@@ -4,8 +4,9 @@ Reproducible clean/noisy foundation for the semester study **Robust NLP Under Ch
 
 Phase 1 proves the team can (a) generate **deterministic** character-noise variants,
 (b) measure their **edit distance** correctly with unit-cost Levenshtein, and (c) show how the
-**fixed BERT WordPiece tokenizer** reacts to matched clean/noisy text. See `PHASE1_PLAN.md` for
-the full breakdown, roles, and step lists.
+**fixed BERT WordPiece tokenizer** reacts to matched clean/noisy text. See
+`docs/assignment/Phase-1/PHASE1_PLAN.md` for the full breakdown, roles, and step lists, and
+`docs/assignment/` for the original assignment PDFs.
 
 **Core rule:** character noise is applied to raw UTF-8 text *before* WordPiece tokenization.
 Anything applied after tokenization is token-level noise and is not part of this study.

@@ -28,7 +28,7 @@ notebook runs the pipeline end to end and shows the evidence.
 Anything after tokenization is token-level noise and is out of scope for Phase 1.
 
 **To run:** Kernel → Restart & Run All. Every artifact is written under `derived/`,
-`evidence/`, and `docs/`. See `PHASE1_PLAN.md` for roles and the step-by-step breakdown.
+`evidence/`, and `docs/`. See `docs/assignment/Phase-1/PHASE1_PLAN.md` for roles and the step-by-step breakdown.
 
 | Stage | Owner | Section |
 |---|---|---|
