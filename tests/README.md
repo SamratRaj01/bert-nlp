@@ -6,8 +6,8 @@ Known-answer and determinism tests. Every run's output is saved to
 | File | Owner | Covers |
 |---|---|---|
 | `test_med.py` | shared | the 5 required known-answer MED cases + normalized MED + empty-string boundary |
-| `test_noise.py` | Student A | determinism (same seed -> same output+log), intensity-0 identity, replay == output, substitution never a no-op, Unicode-safe indexing |
-| `test_tokenizer.py` | Student B | special-token IDs stable, a fixed string -> fixed piece list, `##` and `[UNK]` detection, truncation flag fires past `max_length` |
+| `test_noise.py` | Samrat | determinism (same seed -> same output+log), intensity-0 identity, replay == output, substitution never a no-op, Unicode-safe indexing |
+| `test_tokenizer.py` | Prazol | special-token IDs stable, a fixed string -> fixed piece list, `##` and `[UNK]` detection, truncation flag fires past `max_length` |
 
 ## Run and save output
 ```

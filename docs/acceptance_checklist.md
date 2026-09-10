@@ -13,6 +13,6 @@ Sign only when every box is checked and the evidence is in the repo.
 - [ ] README, environment, seed, configuration, and contribution record complete
 - [ ] Ethics section states authorized-use limits and dual-use implications
 
-Student A: ___________________________  Date: __________
+Samrat: ___________________________  Date: __________
 
-Student B: ___________________________  Date: __________
+Prazol: ___________________________  Date: __________

@@ -1,6 +1,6 @@
 """Determinism and correctness tests for the noise module.
 
-Owner: Student A.
+Owner: Samrat.
 """
 from src.noise.operations import apply
 from src.noise.manifest import replay

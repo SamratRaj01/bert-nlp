@@ -1,4 +1,4 @@
-# src/noise/  (Student A)
+# src/noise/  (Samrat)
 
 Deterministic character-level corruption applied to **raw text, before tokenization**.
 

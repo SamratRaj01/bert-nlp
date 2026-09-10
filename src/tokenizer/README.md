@@ -1,4 +1,4 @@
-# src/tokenizer/  (Student B)
+# src/tokenizer/  (Prazol)
 
 Loads the WordPiece tokenizer **paired with the fixed BERT checkpoint** and measures how
 tokenization responds to noise. The pretrained vocabulary is used as-is — no vocabulary is

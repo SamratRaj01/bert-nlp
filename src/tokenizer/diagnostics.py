@@ -1,6 +1,6 @@
 """Tokenization diagnostics.
 
-Owner: Student B. Steps B4-B5.
+Owner: Prazol. Steps B4-B5.
 
 Per-text metrics and paired clean/noisy deltas. These numbers go into every one of the 20
 pair records and into the clean baseline table.
@@ -62,7 +62,7 @@ def aggregate(rows: list[dict], key: str) -> dict:
 def clean_baseline(examples: list[dict], wrapper) -> dict:
     """Clean-branch tokenization baseline over the slice.
 
-    This is the reference the noisy branch is compared against (Student B deliverable).
+    This is the reference the noisy branch is compared against (Prazol deliverable).
     `wrapper` is a src.tokenizer.wrapper.TokenizerWrapper.
     """
     per = [text_diagnostics(wrapper.encode(e["text"]), e["text"]) for e in examples]

@@ -1,6 +1,6 @@
 """Character-category audit of the corpus slice.
 
-Owner: Student A. Step A4.
+Owner: Samrat. Step A4.
 
 Reads:  derived/slice.jsonl
 Writes: derived/category_audit.json   -- {category: count, ...} plus totals and shares

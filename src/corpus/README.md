@@ -1,4 +1,4 @@
-# src/corpus/  (Student A)
+# src/corpus/  (Samrat)
 
 Turns WikiText-2 into a bounded, documented, deterministic slice and audits what is in it.
 

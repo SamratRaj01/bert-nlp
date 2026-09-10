@@ -1,6 +1,6 @@
 """Character-level edit operations.
 
-Owner: Student A. Steps A5-A6.
+Owner: Samrat. Steps A5-A6.
 
 All operations work on Python str (Unicode code points). Each hit produces one structured
 edit record that references the position in the CLEAN string:

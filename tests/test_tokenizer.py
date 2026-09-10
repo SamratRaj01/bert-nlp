@@ -1,6 +1,6 @@
 """Tokenizer wrapper tests.
 
-Owner: Student B. Needs the cached bert-base-uncased tokenizer (downloaded during setup).
+Owner: Prazol. Needs the cached bert-base-uncased tokenizer (downloaded during setup).
 """
 import pytest
 

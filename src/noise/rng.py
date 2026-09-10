@@ -1,6 +1,6 @@
 """Per-example deterministic RNG.
 
-Owner: Student A. Supports steps A5-A7.
+Owner: Samrat. Supports steps A5-A7.
 
 The whole noise pipeline must be reproducible from one integer (`global_seed`) plus the
 stable `example_id`. Never call the global `random` module directly in noise code.

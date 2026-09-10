@@ -1,6 +1,6 @@
 """Assemble the corpus data card from generated artifacts.
 
-Owner: Student A. Step A4 (completion).
+Owner: Samrat. Step A4 (completion).
 
 Reads:  raw/SOURCE.md, derived/slice.sha256, derived/category_audit.json
 Writes: docs/data_card.md   -- source/version, license, encoding + whitespace/Unicode handling,

@@ -1,6 +1,6 @@
 """Download WikiText-2 and record its provenance.
 
-Owner: Student A. Step A1.
+Owner: Samrat. Step A1.
 
 Writes:
     raw/wikitext-2/{train,validation,test}.raw   -- source text, one dataset row per line

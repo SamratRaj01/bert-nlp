@@ -1,6 +1,6 @@
 # src/integration/  (both students)
 
-Where Student A's noise and Student B's tokenizer meet. Defines the shared record format and
+Where Samrat's noise and Prazol's tokenizer meet. Defines the shared record format and
 runs the end-to-end generator for the 20 paired examples.
 
 | File | Purpose |

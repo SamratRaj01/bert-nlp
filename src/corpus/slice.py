@@ -1,6 +1,6 @@
 """Cut the deterministic corpus slice.
 
-Owner: Student A. Step A2.
+Owner: Samrat. Step A2.
 
 Reads:  raw/wikitext-2/<split>.raw
 Writes: derived/slice.jsonl   -- one example per line:

@@ -1,6 +1,6 @@
 """Corruption manifest: serialise and verify what the noise pipeline did.
 
-Owner: Student A. Step A6-A7.
+Owner: Samrat. Step A6-A7.
 
 One manifest row per generated noisy example, written to
 derived/corruption_manifest.jsonl:

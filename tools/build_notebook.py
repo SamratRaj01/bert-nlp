@@ -32,12 +32,12 @@ Anything after tokenization is token-level noise and is out of scope for Phase 1
 
 | Stage | Owner | Section |
 |---|---|---|
-| Corpus acquisition + provenance | Student A | 1 |
-| Deterministic slice | Student A | 2 |
-| Character-category audit | Student A | 3 |
+| Corpus acquisition + provenance | Samrat | 1 |
+| Deterministic slice | Samrat | 2 |
+| Character-category audit | Samrat | 3 |
 | Minimum Edit Distance + known-answer tests | shared | 4 |
-| Character-noise operations | Student A | 5 |
-| WordPiece tokenizer baseline | Student B | 6 |
+| Character-noise operations | Samrat | 5 |
+| WordPiece tokenizer baseline | Prazol | 6 |
 | 20 paired clean/noisy records | both | 7 |
 | Paired findings | both | 8 |
 | Acceptance checklist (programmatic) | both | 9 |
@@ -102,7 +102,7 @@ print("noise         ", cfg.noise_operations, "intensity", cfg.noise_intensity)
 """)
 
 md(r"""
-## 1. Corpus acquisition & provenance  *(Student A)*
+## 1. Corpus acquisition & provenance  *(Samrat)*
 
 Download WikiText-2, write the raw files verbatim to `raw/wikitext-2/`, and record the
 source, revision, license, row counts, and a SHA-256 per file. **`raw/` is never edited
@@ -118,7 +118,7 @@ print((RAW_DIR / "SOURCE.md").read_text())
 """)
 
 md(r"""
-## 2. Deterministic slice  *(Student A)*
+## 2. Deterministic slice  *(Samrat)*
 
 Apply the selection rule from `configs/config.yaml` to the `train` split. The slice is a pure
 function of (raw file, config) — no randomness — and is checksummed so it can be verified.
@@ -141,7 +141,7 @@ show_table(
 """)
 
 md(r"""
-## 3. Character-category audit + corpus data card  *(Student A)*
+## 3. Character-category audit + corpus data card  *(Samrat)*
 
 Bucket every character in the slice by Unicode category, then assemble `docs/data_card.md`
 (source, license, encoding + whitespace/Unicode handling, split usage, slice rule, count,
@@ -199,7 +199,7 @@ print("\n".join(lines))
 """)
 
 md(r"""
-## 5. Character-noise operations  *(Student A)*
+## 5. Character-noise operations  *(Samrat)*
 
 Deterministic insertion / deletion / substitution on raw text. `intensity` is the independent
 probability that each character position is edited. Every edit is logged as
@@ -234,7 +234,7 @@ print("replay(clean, log) == noisy:", replay(demo, log) == noisy)
 """)
 
 md(r"""
-## 6. WordPiece tokenizer baseline  *(Student B)*
+## 6. WordPiece tokenizer baseline  *(Prazol)*
 
 Load the WordPiece tokenizer paired with the fixed BERT checkpoint — **used as-is, no
 vocabulary is trained** — and write its full data card. The same tokenizer object serves both

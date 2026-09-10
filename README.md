@@ -15,12 +15,12 @@ Anything applied after tokenization is token-level noise and is not part of this
 
 | Path | Purpose | Owner |
 |---|---|---|
-| `raw/` | Untouched WikiText-2 files. Never edited. | Student A |
+| `raw/` | Untouched WikiText-2 files. Never edited. | Samrat |
 | `derived/` | Generated / transformed files (slice, manifests, tokenized output). | both |
 | `configs/` | Single source of truth for checkpoint, seed, noise settings, slice rule. | both |
-| `src/corpus/` | Corpus acquisition, deterministic slice, character-category audit. | Student A |
-| `src/noise/` | Deterministic insertion / deletion / substitution + corruption manifest. | Student A |
-| `src/tokenizer/` | WordPiece tokenizer wrapper, config data card, tokenization diagnostics. | Student B |
+| `src/corpus/` | Corpus acquisition, deterministic slice, character-category audit. | Samrat |
+| `src/noise/` | Deterministic insertion / deletion / substitution + corruption manifest. | Samrat |
+| `src/tokenizer/` | WordPiece tokenizer wrapper, config data card, tokenization diagnostics. | Prazol |
 | `src/med/` | Unit-cost Levenshtein distance + normalized MED. | shared |
 | `src/integration/` | Pair-record schema and per-pair build logic. | both |
 | `phase1.ipynb` | Runnable entry point: orchestrates the full pipeline and shows the evidence. | both |

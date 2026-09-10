@@ -1,6 +1,6 @@
 """WordPiece tokenizer wrapper for the fixed BERT checkpoint.
 
-Owner: Student B. Steps B1, B3.
+Owner: Prazol. Steps B1, B3.
 
 Identical configuration is used for clean and noisy text. No vocabulary training -- the
 pretrained tokenizer that ships with the checkpoint is used as-is.

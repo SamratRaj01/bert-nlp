@@ -1,6 +1,6 @@
 """Emit the tokenizer data card.
 
-Owner: Student B. Step B2.
+Owner: Prazol. Step B2.
 
 Writes docs/tokenizer_card.md from the live tokenizer plus a checksum of its vocab file.
 """
