@@ -4,6 +4,7 @@ Unit-cost Levenshtein (Minimum Edit Distance). Reviewed by both students.
 
 | File | Purpose |
 |---|---|
+| `fast.py` | **Phase 2 (A5).** `med_fast` — exact, NumPy row DP + common prefix/suffix stripping (~13× faster). Cross-checked against `med` on the known answers and 1,000 real clean/noisy pairs; `med` stays the oracle. |
 | `levenshtein.py` | `med(s, t) -> int` using the assignment recurrence, and `normalized_med(clean, noisy) -> float = med / max(1, len(clean))`. |
 
 ## Standard

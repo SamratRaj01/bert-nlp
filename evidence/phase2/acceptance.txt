@@ -1,0 +1,16 @@
+[PASS] All Assignment 1 MED and reproducibility tests still pass; p = 0 leaves the input unchanged
+[PASS] Noise v2: letters only, insert-after, no re-corruption, sentinels preserved, replay exact (all 18,500 rows)
+[PASS] Every smoothed distribution sums to 1 for observed and unseen histories; all allowed targets > 0
+[PASS] Hand vocab {a, b, end} gives 3/6, 2/6, 1/6
+[PASS] λ nonnegative, sum to 1, selected on clean val, frozen in configs/phase2.yaml before the noisy grid; P_mix normalized
+[PASS] Four equally likely targets give 2 bits / PP 4; corpus aggregation matches the hand calculation
+[PASS] Unseen whitespace tokens map to <UNK>; boundaries reset context; evaluation never mutates counts or V
+[PASS] Unsmoothed MLE demo shows infinite loss on a zero-probability event
+[PASS] p = 0 gives the identical clean score for every seed
+[PASS] 222 scores, 6 clean + 72 noisy summary rows saved per training set
+[PASS] Every noisy text generated once and shared by both tokenizers; manifests carry source and config hashes
+[PASS] Empty-after-noise records kept, </s> scored, undefined rates flagged
+[PASS] 20 A1 diagnostic pairs reproduce byte-identically
+[PASS] Test split never scored, inspected, or used for any choice
+[PASS] §17: README reproduces a headline table; plotted points trace to saved CSVs; write-up states metric limits; outputs reusable
+[PASS] Full unit-test suite passes

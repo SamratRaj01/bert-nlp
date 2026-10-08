@@ -1,0 +1,11 @@
+Unsmoothed MLE demonstration (bigram, history <s>)
+training records: 'a', 'a', 'b'  ->  C(<s>,a)=2, C(<s>,b)=1, C(<s>,</s>)=0, C(<s>)=3
+
+  P_MLE(a   | <s>) = 0.6667   -log2 P = 0.5849625007211563
+  P_MLE(b   | <s>) = 0.3333   -log2 P = 1.5849625007211563
+  P_MLE(</s>| <s>) = 0.0000   -log2 P = inf
+
+Scoring the test record '' (target sequence: </s>) under P_MLE:
+  loss = inf bits  (kept as infinite: an unseen event has zero probability)
+  same target under add-one q2: 0.1667 -> 2.5850 bits
+  unseen history P_MLE(a | b b) = None (undefined: C(h) = 0)

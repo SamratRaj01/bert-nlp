@@ -4,7 +4,11 @@ Single source of truth for every reproducible setting. Nothing in `src/` hard-co
 that belongs here.
 
 ## Files
-- `config.yaml` — the active configuration used for the submission run.
+- `config.yaml` — the Phase 1 configuration (frozen record; Phase 2 never edits it).
+- `phase2.yaml` — the Phase 2 protocol (checkpoint, validation-sample rule, training sets, noise grid,
+  vocabulary and λ settings). Everything above the `FROZEN BY phase2.ipynb` marker is the protocol and
+  is hashed (`protocol_sha256`) into every manifest row; the `frozen_lambdas` block below it is written
+  by the notebook (step B6) before any noisy scoring and must not be edited by hand.
 
 ## Fields in `config.yaml`
 | Field | Meaning |

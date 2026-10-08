@@ -1,6 +1,6 @@
 # src/
 
-All Phase 1 code. Organised by pipeline stage and ownership.
+All project code (Phase 1 + Phase 2). Organised by pipeline stage and ownership.
 
 | Package | Owner | Responsibility |
 |---|---|---|
@@ -9,6 +9,9 @@ All Phase 1 code. Organised by pipeline stage and ownership.
 | `tokenizer/` | Prazol | WordPiece tokenizer wrapper, config data card, tokenization diagnostics |
 | `med/` | shared | unit-cost Levenshtein distance + normalized MED |
 | `integration/` | both | pair-record schema and the end-to-end 20-pair generator |
+| `phase2_config.py` | both | Phase 2 config loader (`configs/phase2.yaml`), protocol hash, frozen-λ writer, Phase 2 paths |
+| `lm/` | Prazol | Phase 2 n-gram engine: tokenizer pipelines, frozen V, sparse counts, add-one models, λ selection, loss |
+| `eval/` | both | Phase 2 grid scoring, coverage diagnostics, summary tables, figures |
 
 Each package has its own README describing every file in it.
 

@@ -1,0 +1,7 @@
+45b9784cac97f332aa9bd41010689fab431fe03131cf949715c3eecb83a60378  train_full.jsonl
+selection_rule: every train line that, after strip(), is non-empty and not a '= ...' heading (no length band, no cap)
+count: 17556
+articles: 629
+characters: 10663752
+whitespace_tokens: 2007146
+role: corpus-size extension

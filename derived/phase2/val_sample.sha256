@@ -1,0 +1,7 @@
+4894ff5d0baf2805ef6c0c5ee85579a0139ffb789c77c01fdecdb056c4548a7b  val_sample.jsonl
+selection_rule: validation lines in file order that, after strip(), are non-empty, not '= ...' headings, and 40-600 characters long; first 500
+count: 500
+articles: 36
+characters: 166255
+whitespace_tokens: 31573
+articles_eligible_in_split: 57

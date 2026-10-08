@@ -1,0 +1,11 @@
+Fast MED cross-check (src/med/fast.py vs src/med/levenshtein.py)
+
+        'same' -> 'same'       expected 0  fast 0  ref 0  PASS
+            '' -> 'nlp'        expected 3  fast 3  ref 3  PASS
+      'kitten' -> 'sitting'    expected 3  fast 3  ref 3  PASS
+        'flaw' -> 'lawn'       expected 2  fast 2  ref 2  PASS
+   'intention' -> 'execution'  expected 5  fast 5  ref 5  PASS
+
+real clean/noisy pairs checked: 1000
+mismatches: 0
+time fast 0.84s vs reference 10.72s

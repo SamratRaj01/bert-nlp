@@ -1,4 +1,11 @@
-# CS620 Research Project — Phase 1 (Foundations)
+# CS620 Research Project — Robust NLP Under Character Noise
+
+| Phase | Entry point | Plan | Write-up |
+|---|---|---|---|
+| 1 — Foundations (corpus, character noise, WordPiece) | `phase1.ipynb` | `docs/assignment/Phase-1/PHASE1_PLAN.md` | `docs/phase1_summary.md` |
+| 2 — Baselines (n-gram LMs under noise) | `phase2.ipynb` | `docs/assignment/Phase-2/PHASE2_PLAN.md` | `docs/phase2_summary.md` |
+
+## Phase 1 (Foundations)
 
 Reproducible clean/noisy foundation for the semester study **Robust NLP Under Character Noise**.
 
@@ -24,6 +31,11 @@ Anything applied after tokenization is token-level noise and is not part of this
 | `src/med/` | Unit-cost Levenshtein distance + normalized MED. | shared |
 | `src/integration/` | Pair-record schema and per-pair build logic. | both |
 | `phase1.ipynb` | Runnable entry point: orchestrates the full pipeline and shows the evidence. | both |
+| `phase2.ipynb` | Phase 2 entry point: noise grid, n-gram models, scores, figures, acceptance checks. | both |
+| `configs/phase2.yaml` | Frozen Phase 2 protocol + λ written by the notebook. | both |
+| `src/lm/` | Phase 2 n-gram engine: tokenizer pipelines, vocabularies, sparse counts, models, λ, loss. | Prazol |
+| `src/eval/` | Phase 2 grid runner, coverage diagnostics, summary tables, figures. | both |
+| `results/phase2/` | Phase 2 scores, summaries, per-record metrics, figures. | both |
 | `tests/` | Known-answer and determinism unit tests; outputs saved to `evidence/test_outputs/`. | both |
 | `evidence/` | The 20 paired records (readable + CSV/JSON) and saved test outputs. | both |
 | `docs/` | Corpus data card, tokenizer data card, contribution record, report outline. | both |
@@ -59,6 +71,27 @@ python -m pytest -q                   # known-answer + determinism tests
 
 A classmate should be able to recreate the 20-pair table from a fresh checkout by running
 `phase1.ipynb` top to bottom.
+
+## Phase 2 (Baselines) — run order
+
+```
+.venv/bin/python tools/build_phase2_notebook.py      # only if the notebook source changed
+.venv/bin/jupyter nbconvert --to notebook --execute --inplace phase2.ipynb
+# or: jupyter lab phase2.ipynb, then Kernel -> Restart & Run All   (~1-2 minutes, CPU only)
+```
+
+`phase2.ipynb` builds the frozen validation sample and training sets, generates the 37 noise
+datasets (`derived/phase2/noisy/`), trains add-one unigram / bigram / interpolated models for
+whitespace and WordPiece tokenization, freezes λ into `configs/phase2.yaml`, scores all 222
+conditions per training set, writes tables and figures, and runs the acceptance checklist
+(`evidence/phase2/acceptance.txt`).
+
+**Reproduce the headline table:** after the run, `results/phase2/train_a1_slice/summary.csv` holds
+the 6 clean + 72 noisy rows (mean / min / max over seeds 11, 23, 47), and
+`results/phase2/figures/loss_vs_rate_train_a1_slice.png` plots them. Re-running gives identical
+files. The corpus-size comparison is `results/phase2/corpus_size_comparison.csv`.
+
+Phase 2 also needs `matplotlib` (in `requirements.txt`).
 
 ## Ethics
 
