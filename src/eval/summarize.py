@@ -2,10 +2,11 @@
 
 Owner: both.
 
-    scores           one row per individual perplexity score (222 per training set)
-    summary          6 clean rows + 72 noisy rows: mean / min / max over the 3 seeds
+    scores           one row per individual perplexity score: 222 for the assignment's three
+                     configurations + 74 for the supplementary trigram q3 (296 per training set)
+    summary          8 clean + 96 noisy rows (required subset: 6 + 72), mean / min / max over seeds
     within_pipeline  noisy loss - clean loss (either sign), with target-count change
-    context_benefit  H(q1) - H(q2) and H(q1) - H(P_mix) on the same tokenized condition
+    context_benefit  H(q1) - H(q2), H(q1) - H(q3) and H(q1) - H(P_mix) on the same tokenized condition
     coverage         pooled <UNK>/[UNK] rate, pieces per original span, continuation rate
     severity         requested p vs. the distribution of normalized MED (paired by record ID)
 
@@ -75,9 +76,10 @@ def context_benefit(sc: pd.DataFrame) -> pd.DataFrame:
     keys = ["train_set", "tokenizer", "condition_id", "operation", "p", "seed"]
     piv = sc.pivot_table(index=keys, columns="model", values="H_bits", sort=False).reset_index()
     piv["benefit_q2_bits"] = piv["q1"] - piv["q2"]
+    piv["benefit_q3_bits"] = piv["q1"] - piv["q3"]
     piv["benefit_p_mix_bits"] = piv["q1"] - piv["p_mix"]
     piv.columns.name = None
-    return piv.rename(columns={"q1": "H_q1", "q2": "H_q2", "p_mix": "H_p_mix"})
+    return piv.rename(columns={"q1": "H_q1", "q2": "H_q2", "q3": "H_q3", "p_mix": "H_p_mix"})
 
 
 def coverage(per_record: pd.DataFrame) -> pd.DataFrame:

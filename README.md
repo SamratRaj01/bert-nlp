@@ -81,13 +81,14 @@ A classmate should be able to recreate the 20-pair table from a fresh checkout b
 ```
 
 `phase2.ipynb` builds the frozen validation sample and training sets, generates the 37 noise
-datasets (`derived/phase2/noisy/`), trains add-one unigram / bigram / interpolated models for
-whitespace and WordPiece tokenization, freezes λ into `configs/phase2.yaml`, scores all 222
-conditions per training set, writes tables and figures, and runs the acceptance checklist
+datasets (`derived/phase2/noisy/`), trains add-one unigram / bigram / interpolated models (plus a
+supplementary standalone trigram) for whitespace and WordPiece tokenization, freezes λ into
+`configs/phase2.yaml`, scores the 222 required conditions (+74 trigram) per training set, writes tables and figures, and runs the acceptance checklist
 (`evidence/phase2/acceptance.txt`).
 
 **Reproduce the headline table:** after the run, `results/phase2/train_a1_slice/summary.csv` holds
-the 6 clean + 72 noisy rows (mean / min / max over seeds 11, 23, 47), and
+the 6 clean + 72 noisy required rows, plus 2 + 24 supplementary trigram rows (mean / min / max
+over seeds 11, 23, 47), and
 `results/phase2/figures/loss_vs_rate_train_a1_slice.png` plots them. Re-running gives identical
 files. The corpus-size comparison is `results/phase2/corpus_size_comparison.csv`.
 

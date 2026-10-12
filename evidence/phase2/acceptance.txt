@@ -7,10 +7,11 @@
 [PASS] Unseen whitespace tokens map to <UNK>; boundaries reset context; evaluation never mutates counts or V
 [PASS] Unsmoothed MLE demo shows infinite loss on a zero-probability event
 [PASS] p = 0 gives the identical clean score for every seed
-[PASS] 222 scores, 6 clean + 72 noisy summary rows saved per training set
+[PASS] 222 scores, 6 clean + 72 noisy summary rows saved per training set (+ supplementary q3: 74 scores, 2 + 24 rows)
 [PASS] Every noisy text generated once and shared by both tokenizers; manifests carry source and config hashes
 [PASS] Empty-after-noise records kept, </s> scored, undefined rates flagged
 [PASS] 20 A1 diagnostic pairs reproduce byte-identically
 [PASS] Test split never scored, inspected, or used for any choice
 [PASS] §17: README reproduces a headline table; plotted points trace to saved CSVs; write-up states metric limits; outputs reusable
+[PASS] Loss decomposition by target type adds up to the saved H (both training sets)
 [PASS] Full unit-test suite passes

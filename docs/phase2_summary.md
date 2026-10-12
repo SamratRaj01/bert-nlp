@@ -57,7 +57,10 @@ count are three different quantities.** No record became empty.
 - **Framing:** one sequence per record, `<s> <s> w1 … wn </s>`, context reset per record, one `</s>`
   scored. T counts content targets plus one `</s>` per record.
 - **Models:** add-one `q_k(w|h) = (C(h,w)+1)/(C(h)+|V|)` for k = 1, 2, 3 on sparse integer-keyed
-  counts; scored configurations q1, q2 and `P_mix = λ1 q1 + λ2 q2 + λ3 q3`. Unsmoothed MLE is shown
+  counts; the assignment's scored configurations are q1, q2 and `P_mix = λ1 q1 + λ2 q2 + λ3 q3`. The
+  add-one trigram **q3 is also scored on its own as a supplementary model** (team decision), so every
+  output shows how the trigram behaves; the required counts (222 scores, 6 + 72 summary rows) are
+  verified separately from the 74 extra q3 scores. Unsmoothed MLE is shown
   separately (`evidence/phase2/mle_demo.txt`): an unseen target gets probability 0 and loss ∞.
 - **λ selection:** 15 grid points (step 0.25), minimum clean-validation loss per tokenizer and per
   training set, ties to larger λ1 then λ2; written to `configs/phase2.yaml` before any noisy scoring.
@@ -73,7 +76,7 @@ count are three different quantities.** No record became empty.
 
 ## 3. Verification
 
-- 56/56 unit tests pass (26 Phase 1 + 30 Phase 2; `evidence/phase2/pytest.txt`).
+- 59/59 unit tests pass (26 Phase 1 + 33 Phase 2; `evidence/phase2/pytest.txt`).
 - Hand calculations match the program to 1e-12 (`evidence/phase2/hand_check.md`): the {a, b, end} case
   gives 3/6, 2/6, 1/6; four equally likely targets give 2 bits / PP 4; a 2-record corpus aggregates to
   the hand value; P_mix sums to 1.
@@ -81,9 +84,10 @@ count are three different quantities.** No record became empty.
   histories, with all targets > 0.
 - Fast MED (`src/med/fast.py`) agrees with the Phase 1 reference on the known answers and on 1,000 real
   clean/noisy pairs (13× faster; `evidence/phase2/fast_med_check.txt`).
-- p = 0 regenerated under every seed and operation gives exactly the six clean scores.
+- p = 0 regenerated under every seed and operation gives exactly the eight clean scores (6 required + 2 q3).
 - The 20 Phase 1 diagnostic pairs regenerate byte-identically (`evidence/phase2/a1_pairs_regression.txt`).
-- All 16 acceptance checks pass (`evidence/phase2/acceptance.txt`).
+- All 17 acceptance checks pass (`evidence/phase2/acceptance.txt`), including that the loss
+  decomposition adds up to the saved H.
 
 ## 4. Results (`train_a1_slice`, primary)
 
@@ -93,20 +97,24 @@ count are three different quantities.** No record became empty.
 |---|---|---|---|---|
 | whitespace | q1 | 6.955 | 124.1 | 32,073 |
 | whitespace | q2 | 8.258 | 306.2 | 32,073 |
+| whitespace | q3 *(supplementary)* | 10.142 | 1,130.2 | 32,073 |
 | whitespace | P_mix | 6.955 | 124.1 | 32,073 |
 | WordPiece | q1 | 10.890 | 1,897.9 | 35,971 |
 | WordPiece | q2 | 13.654 | 12,894.3 | 35,971 |
+| WordPiece | q3 *(supplementary)* | 14.613 | 25,058.0 | 35,971 |
 | WordPiece | P_mix | 10.890 | 1,897.9 | 35,971 |
 
-**Noisy loss at p = 0.20** (3-seed mean; the min–max range across seeds is at most 0.05 bits in any of the 72 cells). All 72 rows are in
-`results/phase2/train_a1_slice/summary.csv`.
+**Noisy loss at p = 0.20** (3-seed mean; the min–max range across seeds is at most 0.052 bits in any
+cell). All 72 required rows plus 24 q3 rows are in `results/phase2/train_a1_slice/summary.csv`.
 
 | tokenizer | model | insertion ΔH | deletion ΔH | substitution ΔH |
 |---|---|---|---|---|
 | whitespace | q1 / P_mix | −1.918 | −1.656 | −1.912 |
 | whitespace | q2 | −2.013 | −1.635 | −2.003 |
+| whitespace | q3 *(supplementary)* | −1.644 | −1.264 | −1.629 |
 | WordPiece | q1 / P_mix | +1.998 | +1.199 | +1.896 |
 | WordPiece | q2 | +0.795 | +0.634 | +0.775 |
+| WordPiece | q3 *(supplementary)* | +0.157 | +0.124 | +0.150 |
 
 Observed patterns:
 
@@ -117,6 +125,14 @@ Observed patterns:
    training target (q1(`<UNK>`) = 0.112, 3.16 bits), so every corrupted word becomes a cheap, highly
    predictable symbol. The target count barely moves (T unchanged for insertion and substitution; −356 for
    deletion, where single-letter words vanish).
+
+   **The loss decomposition makes this explicit** (`loss_decomposition_train_a1_slice.png`,
+   `token_type_breakdown.csv`). H splits exactly into share × bits per target type. At 20% substitution
+   the whitespace `<UNK>` share rises from 28% to 57% at 3.2 bits each, while known words (8.5 bits each on clean text) fall
+   from 71% to 41%, so H drops 6.96 → 5.04. In WordPiece the `##` continuation share rises from 7% to 46%
+   at 14.3 bits each and T grows, so H rises 10.89 → 12.79. With full train the pattern holds: `<UNK>` costs
+   6.0 bits instead of 3.2, still far cheaper than a known word (10.1 bits), so whitespace H still falls
+   (9.86 → 7.48).
 3. **WordPiece never loses coverage; it fragments.** The WordPiece `[UNK]` count is exactly 43 in every
    condition (non-ASCII characters in the clean text), so its *rate* falls only because the denominator
    grows. Pieces per original word rise from 1.12 to 2.21 (insertion), 1.95 (substitution) and 1.49
@@ -128,7 +144,14 @@ Observed patterns:
 5. **Context does not help on the slice.** With add-one smoothing and only ~32k training targets, q2 is
    worse than q1 (context benefit H(q1) − H(q2) = −1.30 bits whitespace, −2.76 bits WordPiece, clean), and
    λ selection puts all weight on q1, so P_mix = q1 and its context benefit is 0 in every condition.
-6. **Seeds barely matter at this sample size.** The largest min–max range across the three seeds is
+6. **The trigram is the worst model, and its flat noise curve is not robustness.** Scored on its own,
+   q3 is worse than q1 by 3.19 bits (whitespace) and 3.72 bits (WordPiece) on clean text. Most two-token
+   histories were never seen in 31k training words, so q3 falls back to the uniform 1/|V|. WordPiece q3 is
+   already at 14.61 bits clean, close to the uniform ceiling log2(29,525) = 14.85 bits, so noise can only
+   add +0.12 to +0.16 bits. A model that knows almost nothing has almost nothing to lose. Every λ candidate
+   with λ3 > 0 is worse on clean validation (best with a trigram: (0.75, 0, 0.25), 7.13 vs 6.96 bits
+   whitespace), which is why λ3 = 0 everywhere.
+7. **Seeds barely matter at this sample size.** The largest min–max range across the three seeds is
    0.052 bits (0.060 for `train_full`), small next to the noise effects.
 
 **Three traceable examples** (`results/phase2/train_a1_slice/examples.md`):
@@ -157,6 +180,10 @@ Same validation sample, grid, rule and tie-break; λ re-selected on clean valida
   **grows** (e.g. +2.36 vs +2.00 bits at 20% insertion). A better clean model has more to lose when targets
   turn into fragments. The context benefit shrinks with p and turns slightly negative under 20% deletion
   (−0.03 bits): λ were frozen on clean text.
+- **Trigram q3 (supplementary)** improves with more data but stays the worst model: clean 10.14 → 14.14
+  bits whitespace (|V| grows 15×, so not comparable) and 14.61 → 13.58 bits WordPiece. With real
+  trigram counts it now reacts to noise (WordPiece +0.85 to +0.97 bits at p = 0.20, against +0.12 to
+  +0.16 on the slice), consistent with the near-uniform explanation above. It still never earns λ weight.
 - **Whitespace:** clean loss *rises* 6.96 → 9.86 bits with 64× more text. This is not a worse model. The
   vocabulary grows 15× and the `<UNK>` rate drops 0.28 → 0.05, so far fewer targets are the cheap `<UNK>`.
   Whitespace perplexities across training sets measure different prediction problems.
@@ -174,8 +201,9 @@ Same validation sample, grid, rule and tie-break; λ re-selected on clean valida
 - **Scores measure the surprise of corrupted sequences, not semantic recovery.** Nothing here says
   whether meaning survives the noise. That needs the neural and downstream evaluations planned for
   later phases.
-- **Add-one smoothing dominates.** With large |V| it over-smooths so heavily that q2 loses to q1 and
-  the trigram never receives weight on the 0.25 grid. Better smoothers (Kneser–Ney, finer λ grids)
+- **Add-one smoothing dominates.** With large |V| it over-smooths so heavily that q2 loses to q1, the
+  standalone trigram q3 is the worst model in every configuration, and the trigram never receives weight
+  on the 0.25 grid. Better smoothers (Kneser–Ney, finer λ grids)
   could change the context-benefit conclusions.
 - **Development evidence only.** λ were tuned on the same validation sample that is reported; 500
   records from 36 articles is a bounded sample. Uncertainty is shown only as the min–max over three

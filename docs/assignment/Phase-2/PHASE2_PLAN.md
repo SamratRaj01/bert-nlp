@@ -311,6 +311,11 @@ students review and approve it before any scoring.
    | All individual scores | 6 + 216 | 222 |
    | Noisy summary rows | 6 × 3 ops × 4 rates | 72 |
 
+   **Team decision (2026-10-08):** the add-one trigram q3 is also scored on its own as a
+   **supplementary** model (1 × 2 tokenizers × 37 datasets = 74 extra scores; 2 clean + 24 noisy
+   summary rows) so it appears in every output. The assignment's three configurations and the
+   counts above are unchanged and still verified on their own.
+
 3. **Machine-readable outputs** (`results/phase2/<train_set>/`):
    - `per_record.parquet|csv`: one row per (record, condition, tokenizer, model) with NLL sums,
      `T`, and the diagnostics.

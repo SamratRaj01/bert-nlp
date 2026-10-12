@@ -1,6 +1,6 @@
 {
-  "protocol_sha256": "9eb487cc5deea14c60931cfec70b1bf4bacaf13d23be2cd8634dd7aae3bc10a6",
-  "config_file_sha256": "f79c4591784dc0c512fc34ef31f61a7ad15d3f6f0c823dceba2148475d64fcac",
+  "protocol_sha256": "a2df71c67dcb31fdfadf08958af89bfae314c814509ef2994cc7d2655eccf000",
+  "config_file_sha256": "809c9f398ef9180b0dbf6ae2adc8e63ca82054be5748b805df5a7731e1a1f872",
   "frozen_lambdas": {
     "train_a1_slice": {
       "whitespace": [
@@ -32,7 +32,7 @@
     "train_a1_slice": "967fd344fb0ad152cb7bea73b5031cef951165a2df5d9f404a349887f5ab289c",
     "train_full": "45b9784cac97f332aa9bd41010689fab431fe03131cf949715c3eecb83a60378"
   },
-  "grid_index_sha256": "74ae5262edb08ad586c87b3acd23b432099f681c1976b444525408cb360bb74b",
+  "grid_index_sha256": "28f6983873cb380e2a2bea7677d3a8c81faf10609308d293b845ddae16f4c64f",
   "env": {
     "python": "3.13.11",
     "transformers": "5.16.1",
@@ -40,5 +40,5 @@
     "numpy": "2.5.3",
     "pandas": "3.0.5"
   },
-  "runtime_seconds": 46.4
+  "runtime_seconds": 53.2
 }

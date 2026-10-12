@@ -76,3 +76,31 @@ def test_scores_aggregate_before_dividing_and_summary_counts():
     noisy = sm[sm.operation == "deletion"].iloc[0]
     assert noisy["n_seeds"] == 2
     assert noisy["H_bits_min"] == pytest.approx(8.0 / 6) and noisy["H_bits_max"] == pytest.approx(12.0 / 6)
+
+
+def test_loss_decomposition_sums_to_corpus_loss():
+    from src.eval.decompose import loss_decomposition
+    from src.lm.counts import NgramCounts
+    from src.lm.models import AddOneLM
+    from src.lm.score import Engine, corpus_loss, record_losses
+    from src.lm.vocab import whitespace_vocab
+
+    class Split:
+        name = "whitespace"
+        def tokenize_batch(self, texts):
+            return [t.split() for t in texts]
+
+    train = [["the", "cat", "sat"], ["the", "dog", "sat"], ["a", "cat"]]
+    v, stats = whitespace_vocab(train, min_count=2)          # 'dog', 'a' -> <UNK>
+    c = NgramCounts(v).fit(train)
+    eng = Engine("toy", "whitespace", Split(), v, stats, c, AddOneLM(c))
+    rows = {"clean": [{"noisy_text": "the cat sat", "operation": None, "p": 0.0, "seed": None},
+                      {"noisy_text": "a zebra sat", "operation": None, "p": 0.0, "seed": None}]}
+    dec = loss_decomposition(eng, (0.5, 0.5, 0.0), rows)
+    sums = [record_losses(eng.lm.q_arrays(v.map_tokens(t.split())), "p_mix", (0.5, 0.5, 0.0))
+            for t in ("the cat sat", "a zebra sat")]
+    H = corpus_loss(sum(s[0] for s in sums), sum(s[1] for s in sums), sum(s[2] for s in sums))["H_bits"]
+    assert sum(r["contribution_bits"] for r in dec) == pytest.approx(H, abs=1e-12)
+    by_type = {r["token_type"]: r for r in dec}
+    assert by_type["unknown"]["targets"] == 2 and by_type["end"]["targets"] == 2   # 'a', 'zebra'; two </s>
+    assert sum(r["share"] for r in dec) == pytest.approx(1.0)

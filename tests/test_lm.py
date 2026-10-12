@@ -9,7 +9,8 @@ import pytest
 
 from src.lm.counts import NgramCounts
 from src.lm.interp import lambda_grid, mix_loss_bits, select_lambdas
-from src.lm.models import AddOneLM, model_probs, nll_bits, p_mle
+from src.lm.models import (AddOneLM, MODELS, REQUIRED_MODELS, SUPPLEMENTARY_MODELS, model_probs,
+                           nll_bits, p_mle)
 from src.lm.score import corpus_loss, record_losses
 from src.lm.vocab import Vocab, whitespace_vocab, wordpiece_vocab
 
@@ -162,3 +163,19 @@ def test_lambda_tie_break_prefers_simpler_model():
 def test_model_probs_p_mix_is_weighted_sum():
     q = np.array([[0.2, 0.4, 0.6]])
     assert model_probs(q, "p_mix", (0.25, 0.25, 0.5))[0] == pytest.approx(0.05 + 0.1 + 0.3)
+
+
+def test_required_and_supplementary_models():
+    assert REQUIRED_MODELS == ("q1", "q2", "p_mix")          # the assignment's three configurations
+    assert SUPPLEMENTARY_MODELS == ("q3",)
+    assert set(MODELS) == set(REQUIRED_MODELS) | set(SUPPLEMENTARY_MODELS)
+
+
+def test_q3_scores_the_trigram_column_by_hand():
+    v, c, lm = _hand_case()                                   # records 'a', 'a', 'b'
+    q = lm.q_arrays(v.map_tokens(["a"]))                      # targets: a | <s> <s>,  </s> | <s> a
+    # hand: C(<s><s>, a) = 2, C(<s><s>) = 3 -> 3/6 ;  C(<s>a, </s>) = 2, C(<s>a) = 2 -> 3/5
+    assert model_probs(q, "q3")[0] == pytest.approx(3 / 6, abs=TOL)
+    assert model_probs(q, "q3")[1] == pytest.approx(3 / 5, abs=TOL)
+    s = v.start_id
+    assert lm.distribution(3, (s, v.index["a"])).sum() == pytest.approx(1.0, abs=1e-12)

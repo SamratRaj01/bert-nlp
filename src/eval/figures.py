@@ -21,7 +21,9 @@ OPS = ["insertion", "deletion", "substitution"]
 OP_COLOR = {"insertion": "#2a78d6", "deletion": "#eb6834", "substitution": "#1baf7a"}
 OP_MARKER = {"insertion": "o", "deletion": "s", "substitution": "^"}
 TOKENIZERS = ["whitespace", "wordpiece"]
-MODEL_LABEL = {"q1": "add-one unigram q1", "q2": "add-one bigram q2", "p_mix": "interpolated P_mix"}
+MODEL_LABEL = {"q1": "add-one unigram q1", "q2": "add-one bigram q2",
+               "q3": "add-one trigram q3 (supplementary)", "p_mix": "interpolated P_mix"}
+LOSS_MODELS = ["q1", "q2", "q3", "p_mix"]
 INK, INK2, GRID, SURFACE = "#0b0b0b", "#52514e", "#e4e3df", "#fcfcfb"
 RATES = [0.0, 0.01, 0.05, 0.10, 0.20]
 X_LABEL = "corruption rate p (evenly spaced)"
@@ -66,48 +68,53 @@ def _legend(fig):
 
 
 def loss_vs_rate(summary: pd.DataFrame, train_set: str, out: Path) -> Path:
-    fig, axes = plt.subplots(3, 2, figsize=(8.5, 8.5), constrained_layout=True)
-    fig.get_layout_engine().set(rect=(0, 0, 1, 0.92))
+    n = len(LOSS_MODELS)
+    fig, axes = plt.subplots(n, 2, figsize=(8.5, 2.95 * n), constrained_layout=True)
+    fig.get_layout_engine().set(rect=(0, 0, 1, 0.905))
     for c, tok in enumerate(TOKENIZERS):
-        for r, model in enumerate(["q1", "q2", "p_mix"]):
+        for r, model in enumerate(LOSS_MODELS):
             ax = axes[r, c]
             for op, xs, mean, lo, hi in _with_clean(summary, "H_bits", train_set, tok, model):
                 ax.fill_between(_x(xs), lo, hi, color=OP_COLOR[op], alpha=0.18, linewidth=0)
                 ax.plot(_x(xs), mean, color=OP_COLOR[op], marker=OP_MARKER[op])
             ax.set_title(f"{tok} · {MODEL_LABEL[model]}")
-            _rate_axis(ax, label=(r == 2))
+            _rate_axis(ax, label=(r == n - 1))
             if c == 0:
                 ax.set_ylabel("loss H (bits / target)")
     _legend(fig)
-    fig.suptitle(f"Validation loss vs. noise rate — trained on {train_set} (band = min–max over 3 seeds)",
-                 y=0.95, fontsize=10)
+    fig.suptitle(f"Validation loss vs. noise rate — trained on {train_set} (band = min–max over 3 seeds)\n"
+                 "left, whitespace: loss FALLS — corrupted words collapse into the cheap, frequent <UNK>\n"
+                 "right, WordPiece: loss RISES — corrupted words split into many rare ## pieces",
+                 y=0.962, fontsize=9.5)
     fig.savefig(out, dpi=150)
     plt.close(fig)
     return out
 
 
 def context_benefit_fig(cb: pd.DataFrame, train_set: str, out: Path) -> Path:
-    fig, axes = plt.subplots(1, 2, figsize=(8.5, 3.6), constrained_layout=True)
-    fig.get_layout_engine().set(rect=(0, 0, 1, 0.86))
+    rows = [("benefit_q2_bits", "H(q1) − H(q2)"), ("benefit_q3_bits", "H(q1) − H(q3) (supplementary)"),
+            ("benefit_p_mix_bits", "H(q1) − H(P_mix)")]
+    fig, axes = plt.subplots(len(rows), 2, figsize=(8.5, 8.2), constrained_layout=True)
+    fig.get_layout_engine().set(rect=(0, 0, 1, 0.92))
     for c, tok in enumerate(TOKENIZERS):
-        ax = axes[c]
         d = cb[(cb.train_set == train_set) & (cb.tokenizer == tok)]
         clean = d[d.condition_id == "clean"].iloc[0]
-        for op in OPS:
-            g = d[d.operation == op].groupby("p")["benefit_p_mix_bits"].agg(["mean", "min", "max"])
-            xs = [0.0] + list(g.index)
-            ax.fill_between(_x(xs), [clean.benefit_p_mix_bits] + list(g["min"]),
-                            [clean.benefit_p_mix_bits] + list(g["max"]),
-                            color=OP_COLOR[op], alpha=0.18, linewidth=0)
-            ax.plot(_x(xs), [clean.benefit_p_mix_bits] + list(g["mean"]),
-                    color=OP_COLOR[op], marker=OP_MARKER[op])
-        ax.axhline(0, color=INK2, linewidth=1)
-        ax.set_title(f"{tok}: H(q1) − H(P_mix)")
-        _rate_axis(ax)
-        if c == 0:
-            ax.set_ylabel("context benefit (bits / target)")
+        for r, (col, label) in enumerate(rows):
+            ax = axes[r, c]
+            for op in OPS:
+                g = d[d.operation == op].groupby("p")[col].agg(["mean", "min", "max"])
+                xs = [0.0] + list(g.index)
+                ax.fill_between(_x(xs), [clean[col]] + list(g["min"]), [clean[col]] + list(g["max"]),
+                                color=OP_COLOR[op], alpha=0.18, linewidth=0)
+                ax.plot(_x(xs), [clean[col]] + list(g["mean"]), color=OP_COLOR[op], marker=OP_MARKER[op])
+            ax.axhline(0, color=INK2, linewidth=1)
+            ax.set_title(f"{tok}: {label}")
+            _rate_axis(ax, label=(r == len(rows) - 1))
+            if c == 0:
+                ax.set_ylabel("benefit (bits / target)")
     _legend(fig)
-    fig.suptitle(f"Context benefit of interpolation over the unigram — {train_set}", y=0.9, fontsize=10)
+    fig.suptitle(f"Context benefit over the unigram (positive = better than q1) — {train_set}",
+                 y=0.95, fontsize=10)
     fig.savefig(out, dpi=150)
     plt.close(fig)
     return out
@@ -186,6 +193,55 @@ def corpus_size_fig(summary: pd.DataFrame, out: Path) -> Path:
     handles += [plt.Line2D([], [], color=INK2, linestyle=ls, label=ts) for ts, ls in styles.items()]
     fig.legend(handles=handles, loc="upper center", ncol=5, bbox_to_anchor=(0.5, 1.0))
     fig.suptitle("Within-pipeline loss change: A1 slice (solid) vs. full train (dashed)", y=0.9, fontsize=10)
+    fig.savefig(out, dpi=150)
+    plt.close(fig)
+    return out
+
+
+TYPE_ORDER = ["word", "continuation", "unknown", "end"]
+TYPE_COLOR = {"word": "#4a3aa7", "continuation": "#e87ba4", "unknown": "#eda100", "end": "#008300"}
+TYPE_LABEL = {"whitespace": {"word": "known word", "unknown": "<UNK>", "end": "</s>"},
+              "wordpiece": {"word": "word-start piece", "continuation": "## continuation piece",
+                            "unknown": "[UNK]", "end": "</s>"}}
+PANEL_TITLE = {"whitespace": "whitespace: loss FALLS under noise\ncorrupted words collapse into the cheap, frequent <UNK>",
+               "wordpiece": "WordPiece: loss RISES under noise\ncorrupted words split into many rare ## pieces"}
+
+
+def loss_decomposition_fig(dec: pd.DataFrame, train_set: str, out: Path, p: float = 0.20) -> Path:
+    """Stacked bars: H = sum over token types of share x mean cost, clean vs each operation at p."""
+    d = dec[(dec.train_set == train_set) & (dec.model == "p_mix")]
+    bars = [("clean", "none", 0.0)] + [(f"{op}\np = {p:.2f}", op, p) for op in OPS]
+    fig, axes = plt.subplots(1, 2, figsize=(10, 6.0), constrained_layout=True)
+    fig.get_layout_engine().set(rect=(0, 0, 1, 0.92))
+    for ax, tok in zip(axes, TOKENIZERS):
+        dt = d[d.tokenizer == tok]
+        types = [t for t in TYPE_ORDER if t in TYPE_LABEL[tok]]
+        for x, (label, op, pp) in enumerate(bars):
+            g = (dt[(dt.operation == op) & (dt.p.round(2) == round(pp, 2))]
+                 .groupby("token_type")[["contribution_bits", "share", "mean_bits"]].mean())
+            bottom = 0.0
+            for t in types:
+                h = float(g.loc[t, "contribution_bits"])
+                ax.bar(x, h, bottom=bottom, width=0.62, color=TYPE_COLOR[t],
+                       edgecolor=SURFACE, linewidth=1.5,
+                       label=TYPE_LABEL[tok][t] if x == 0 else None)
+                if h >= 0.55:
+                    ax.text(x, bottom + h / 2, f"{g.loc[t, 'share']:.0%} × {g.loc[t, 'mean_bits']:.1f}",
+                            ha="center", va="center", fontsize=7.5,
+                            color="white" if t in ("word", "end") else INK)
+                bottom += h
+            ax.text(x, bottom + 0.15, f"H = {bottom:.2f}", ha="center", va="bottom", fontsize=8.5,
+                    color=INK, fontweight="bold")
+        ax.set_xticks(range(len(bars)), [b[0] for b in bars])
+        ax.set_ylabel("contribution to H (bits per target)")
+        ax.set_title(PANEL_TITLE[tok], fontsize=9.5)
+        ax.grid(axis="x", visible=False)
+        ax.set_ylim(0, ax.get_ylim()[1] * 1.06)
+        ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.13), ncol=2, fontsize=8,
+                  title="target type · segment label = share of targets × bits per target",
+                  title_fontsize=8)
+    fig.suptitle(f"Why the loss moves in opposite directions — P_mix, trained on {train_set} "
+                 f"(3-seed mean at p = {p:.2f})", y=0.97, fontsize=10)
     fig.savefig(out, dpi=150)
     plt.close(fig)
     return out

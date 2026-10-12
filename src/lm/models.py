@@ -7,7 +7,10 @@ Owner: Prazol. Phase 2 step B5.
     P_MLE(w | h)  = C(h, w) / C(h)          only when C(h) > 0; unseen targets get 0
 
 Unseen histories (C(h) = 0) make q_k uniform, 1/|V|. All orders share one V per tokenizer.
-The third configuration is P_mix -- never a standalone q3.
+
+The assignment's three configurations are q1, q2 and P_mix (its third configuration is P_mix,
+not a standalone q3). The add-one trigram q3 is additionally scored as a SUPPLEMENTARY model
+(team decision) so its standalone behaviour is visible in every output; it never replaces P_mix.
 """
 from __future__ import annotations
 
@@ -17,7 +20,9 @@ import numpy as np
 
 from .counts import NgramCounts
 
-MODELS = ("q1", "q2", "p_mix")
+REQUIRED_MODELS = ("q1", "q2", "p_mix")     # the assignment's three configurations
+SUPPLEMENTARY_MODELS = ("q3",)              # standalone add-one trigram, reported alongside
+MODELS = ("q1", "q2", "q3", "p_mix")
 
 
 class AddOneLM:
@@ -51,11 +56,13 @@ class AddOneLM:
 
 
 def model_probs(q: np.ndarray, model: str, lambdas: tuple[float, float, float] | None = None) -> np.ndarray:
-    """Probability of each observed target under one of the three configurations."""
+    """Probability of each observed target under one of the scored models."""
     if model == "q1":
         return q[:, 0]
     if model == "q2":
         return q[:, 1]
+    if model == "q3":
+        return q[:, 2]
     if model == "p_mix":
         l1, l2, l3 = lambdas
         return l1 * q[:, 0] + l2 * q[:, 1] + l3 * q[:, 2]

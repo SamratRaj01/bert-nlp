@@ -48,7 +48,8 @@ noise:
 
 lm:
   tokenizers: [whitespace, wordpiece]
-  models: [q1, q2, p_mix]
+  models: [q1, q2, p_mix]                 # the assignment's three configurations
+  supplementary_models: [q3]               # standalone add-one trigram, scored and reported alongside (team decision)
   start_symbol: "<s>"                      # context only: never in V, never scored
   end_symbol: "</s>"
   whitespace_unk: "<UNK>"

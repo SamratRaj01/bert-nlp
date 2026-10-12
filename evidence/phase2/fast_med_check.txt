@@ -8,4 +8,4 @@ Fast MED cross-check (src/med/fast.py vs src/med/levenshtein.py)
 
 real clean/noisy pairs checked: 1000
 mismatches: 0
-time fast 0.84s vs reference 10.72s
+time fast 0.81s vs reference 10.42s

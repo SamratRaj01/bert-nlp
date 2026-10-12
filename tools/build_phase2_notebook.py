@@ -51,6 +51,7 @@ notebook runs it end to end and shows the evidence. Plan and checklist:
 | B7 + A6 run the grid (A1 slice, primary) | both | 12 |
 | Results tables | both | 13 |
 | Figures | both | 14 |
+| Why the loss moves in opposite directions (decomposition) | both | 14b |
 | Error analysis — 3 traceable examples | both | 15 |
 | Corpus-size extension (full train) | both | 16 |
 | A7 20 A1 diagnostic pairs — regression | both | 17 |
@@ -83,11 +84,12 @@ from src.med.fast import med_fast
 from src.lm.tokenize import make_pipelines
 from src.lm.vocab import Vocab
 from src.lm.counts import NgramCounts
-from src.lm.models import AddOneLM, p_mle, nll_bits, MODELS
+from src.lm.models import AddOneLM, p_mle, nll_bits, MODELS, REQUIRED_MODELS, SUPPLEMENTARY_MODELS
 from src.lm.score import build_engine, q_for_records, record_losses, corpus_loss
 from src.lm.interp import lambda_grid
 from src.eval.run_grid import score_grid, select_and_freeze, frozen_lambdas
 from src.eval.summarize import write_tables, severity
+from src.eval.decompose import loss_decomposition
 from src.eval import figures
 
 ensure_p2_dirs()
@@ -140,8 +142,11 @@ show_table([
     {"quantity": "noisy perplexity scores", "calculation": "6 × 36", "total": n_cfg * n_noisy},
     {"quantity": "all individual scores (per training set)", "calculation": "6 + 216", "total": n_cfg * (1 + n_noisy)},
     {"quantity": "noisy summary rows (per training set)", "calculation": "6 × 3 operations × 4 rates", "total": n_cfg * 3 * len(cfg.rates)},
-], title="Experiment size (assignment p. 2)")
+    {"quantity": "supplementary: standalone trigram q3", "calculation": "1 model × 2 tokenizers × 37 datasets",
+     "total": len(cfg.lm["supplementary_models"]) * 2 * (1 + n_noisy)},
+], title="Experiment size (assignment p. 2) + supplementary trigram")
 assert (n_cfg, n_noisy, n_cfg * (1 + n_noisy)) == (6, 36, 222)
+assert tuple(cfg.lm["models"]) == REQUIRED_MODELS and tuple(cfg.lm["supplementary_models"]) == SUPPLEMENTARY_MODELS
 
 show_table([
     {"setting": "noise rule", "value": cfg.noise["rule_version"]},
@@ -369,7 +374,10 @@ md(r"""
 
 $q_k(w\mid h)=\dfrac{C(h,w)+1}{C(h)+|V|}$ for $k=1,2,3$; unseen histories become uniform $1/|V|$.
 $P_{mix}(w\mid h)=\lambda_1 q_1(w)+\lambda_2 q_2(w\mid\text{last token})+\lambda_3 q_3(w\mid\text{last two tokens})$.
-The three scored configurations are $q_1$, $q_2$ and $P_{mix}$ (never a standalone $q_3$).
+The assignment's three configurations are $q_1$, $q_2$ and $P_{mix}$ (its third configuration is $P_{mix}$,
+not a standalone $q_3$). The add-one trigram $q_3$ is **also scored on its own as a supplementary model**
+(team decision), so every table and figure shows how the trigram behaves, while the required counts
+(222 scores, 6 + 72 summary rows) stay separately verifiable.
 
 The **unsmoothed MLE** $P_{MLE}=C(h,w)/C(h)$ is demonstrated separately on a small case: an unseen
 target gets probability 0 and the loss is kept as **∞**, not hidden.
@@ -495,7 +503,8 @@ md(r"""
 ## 12. B7 + A6 — run the frozen grid (primary: `train_a1_slice`)  *(both)*
 
 First the **clean-invariance** check: the p = 0 dataset regenerated under every seed and operation
-must score identically. Then all 37 datasets × 2 tokenizers × 3 models = **222 scores**. Every
+must score identically. Then all 37 datasets × 2 tokenizers × 3 models = **222 required scores**, plus
+74 supplementary trigram ($q_3$) scores (296 in total). Every
 per-record row keeps article/record/condition IDs, NLL sums in bits and nats, T, MED and the
 coverage diagnostics (boundary symbols excluded; zero-token outputs flagged, not dropped).
 """)
@@ -511,8 +520,8 @@ for seed in cfg.seeds:
             for model in MODELS:
                 s = [record_losses(q, model, LAMBDAS[tok] if model == "p_mix" else None) for q in qs]
                 clean_scores.add((tok, model, sum(x[0] for x in s), sum(x[2] for x in s)))
-clean_invariant = len(clean_scores) == 6
-print("distinct clean scores across 3 seeds x 3 operations:", len(clean_scores), "(expected 6)")
+clean_invariant = len(clean_scores) == 2 * len(MODELS)
+print("distinct clean scores across 3 seeds x 3 operations:", len(clean_scores), f"(expected {2 * len(MODELS)})")
 assert clean_invariant
 """)
 
@@ -531,10 +540,18 @@ def run_training_set(train_set, engines, lambdas):
 snap_before = {tok: (eng.counts.snapshot(), eng.vocab.size) for tok, eng in engines.items()}
 per_record, T_slice = run_training_set("train_a1_slice", engines, LAMBDAS)
 counts_unchanged = all((eng.counts.snapshot(), eng.vocab.size) == snap_before[tok] for tok, eng in engines.items())
-sc = T_slice["scores"]
-assert len(sc) == 222 and (sc.condition_id == "clean").sum() == 6
-sm = T_slice["summary"]
-assert (sm.operation == "none").sum() == 6 and (sm.operation != "none").sum() == 72
+def counts_ok(tables):
+    sc, sm = tables["scores"], tables["summary"]
+    req_sc, req_sm = sc[sc.model.isin(REQUIRED_MODELS)], sm[sm.model.isin(REQUIRED_MODELS)]
+    sup_sc, sup_sm = sc[sc.model.isin(SUPPLEMENTARY_MODELS)], sm[sm.model.isin(SUPPLEMENTARY_MODELS)]
+    return (len(req_sc) == 222 and (req_sc.condition_id == "clean").sum() == 6
+            and (req_sm.operation == "none").sum() == 6 and (req_sm.operation != "none").sum() == 72
+            and len(sup_sc) == 74 and (sup_sm.operation == "none").sum() == 2
+            and (sup_sm.operation != "none").sum() == 24)
+
+sc, sm = T_slice["scores"], T_slice["summary"]
+assert counts_ok(T_slice)
+print("required: 222 scores, 6 clean + 72 noisy summary rows; supplementary q3: 74 scores, 2 + 24 rows")
 print("evaluation left counts and V unchanged:", counts_unchanged)
 """)
 
@@ -543,19 +560,19 @@ md("## 13. Results tables (`train_a1_slice`)  *(both)*")
 code(r"""
 clean = sm[sm.operation == "none"][["tokenizer", "model", "H_bits_mean", "PP_mean", "T_mean"]]
 show_table(clean.rename(columns={"H_bits_mean": "H_bits", "PP_mean": "PP", "T_mean": "T"}),
-           title="Clean validation scores (6) — compare WITHIN a tokenizer only")
+           title="Clean validation scores (6 required + 2 supplementary q3) — compare WITHIN a tokenizer only")
 
 for tok in ["whitespace", "wordpiece"]:
     s = sm[(sm.tokenizer == tok) & (sm.operation != "none")]
     piv = s.pivot_table(index=["operation", "p"], columns="model", values="H_bits_mean", sort=False).reset_index()
     rng = s.pivot_table(index=["operation", "p"], columns="model", values="delta_H_bits_mean", sort=False).reset_index()
     out = piv.merge(rng, on=["operation", "p"], suffixes=("", " ΔH"))
-    show_table(out, title=f"{tok}: noisy H_bits (3-seed mean) and Δ vs clean — 24 of the 72 summary rows")
+    show_table(out, title=f"{tok}: noisy H_bits (3-seed mean) and Δ vs clean — q1, q2, q3 (suppl.), P_mix")
 """)
 
 code(r"""
 cb = T_slice["context_benefit"]
-cbs = (cb.groupby(["tokenizer", "operation", "p"], sort=False)[["benefit_q2_bits", "benefit_p_mix_bits"]]
+cbs = (cb.groupby(["tokenizer", "operation", "p"], sort=False)[["benefit_q2_bits", "benefit_q3_bits", "benefit_p_mix_bits"]]
          .mean().reset_index())
 show_table(cbs[cbs.p.isin([0.0, 0.05, 0.20])], title="Context benefit H(q1) − H(·), bits (positive = better than q1)")
 
@@ -586,6 +603,44 @@ figs = [
 ]
 for f in figs:
     display(Image(filename=str(f)))
+""")
+
+md(r"""
+## 14b. Why the loss moves in opposite directions  *(both)*
+
+Noise creates words the model has never seen, so one might expect the loss to rise everywhere. It
+does for WordPiece, but it **falls** for whitespace. The reason is how each pipeline represents an
+unseen word:
+
+* **whitespace** maps it to `<UNK>`, the most frequent training target, which costs only ~3 bits;
+* **WordPiece** splits it into several rare `##` pieces, ~14 bits each, and the target count grows.
+
+H is an average over targets, so it splits *exactly* into per-type contributions:
+$H = \sum_{\text{type}} \text{share(type)} \times \text{mean bits(type)}$. The table and figure below
+show that decomposition for $P_{mix}$ (saved to `token_type_breakdown.csv`; the parts add up to the
+saved H to within $10^{-9}$). A falling whitespace score is unknown-token collapse, not robustness.
+""")
+
+code(r"""
+def decompose(train_set, engines, lambdas):
+    rows = []
+    for tok, eng in engines.items():
+        rows += loss_decomposition(eng, lambdas[tok], condition_rows)
+    dec = pd.DataFrame(rows)
+    dec.to_csv(RESULTS_P2_DIR / train_set / "token_type_breakdown.csv", index=False)
+    sc_mix = pd.read_csv(RESULTS_P2_DIR / train_set / "scores.csv")
+    sc_mix = sc_mix[sc_mix.model == "p_mix"].set_index(["tokenizer", "condition_id"]).H_bits
+    total = dec.groupby(["tokenizer", "condition_id"]).contribution_bits.sum()
+    return dec, float((total - sc_mix.loc[total.index]).abs().max())
+
+dec_slice, dec_err_slice = decompose("train_a1_slice", engines, LAMBDAS)
+print("max |sum of contributions − saved H| =", dec_err_slice)
+view = dec_slice[dec_slice.condition_id.isin(["clean", "ins-p0.20-s11", "del-p0.20-s11", "sub-p0.20-s11"])]
+show_table(view[["tokenizer", "condition_id", "token_type", "targets", "share", "mean_bits", "contribution_bits"]],
+           title="P_mix loss by target type (seed 11 shown; all seeds in token_type_breakdown.csv)")
+display(Image(filename=str(figures.loss_decomposition_fig(
+    pd.read_csv(RESULTS_P2_DIR / "train_a1_slice" / "token_type_breakdown.csv"), "train_a1_slice",
+    FIG_DIR / "loss_decomposition_train_a1_slice.png"))))
 """)
 
 md(r"""
@@ -688,7 +743,7 @@ LAMBDAS_FULL = {tok: frozen_lambdas(cfg, "train_full", tok) for tok in engines_f
 print("frozen λ (train_full):", LAMBDAS_FULL)
 
 per_record_full, T_full = run_training_set("train_full", engines_full, LAMBDAS_FULL)
-assert len(T_full["scores"]) == 222 and len(T_full["summary"]) == 78
+assert counts_ok(T_full)
 """)
 
 code(r"""
@@ -722,6 +777,11 @@ figs2 = [figures.loss_vs_rate(load_csv("train_full", "summary"), "train_full", F
          figures.corpus_size_fig(both, FIG_DIR / "corpus_size.png")]
 for f in figs2[::3]:
     display(Image(filename=str(f)))
+
+dec_full, dec_err_full = decompose("train_full", engines_full, LAMBDAS_FULL)
+display(Image(filename=str(figures.loss_decomposition_fig(
+    pd.read_csv(RESULTS_P2_DIR / "train_full" / "token_type_breakdown.csv"), "train_full",
+    FIG_DIR / "loss_decomposition_train_full.png"))))
 """)
 
 md(r"""
@@ -802,9 +862,10 @@ check("Unseen whitespace tokens map to <UNK>; boundaries reset context; evaluati
       unk_ok and counts_unchanged and tests_pass)
 check("Unsmoothed MLE demo shows infinite loss on a zero-probability event", mle_inf)
 check("p = 0 gives the identical clean score for every seed", clean_invariant)
-check("222 scores, 6 clean + 72 noisy summary rows saved per training set",
-      all(len(pd.read_csv(RESULTS_P2_DIR / ts / "scores.csv")) == 222
-          and len(pd.read_csv(RESULTS_P2_DIR / ts / "summary.csv")) == 78 for ts in ("train_a1_slice", "train_full")))
+check("222 scores, 6 clean + 72 noisy summary rows saved per training set (+ supplementary q3: 74 scores, 2 + 24 rows)",
+      all(counts_ok({"scores": pd.read_csv(RESULTS_P2_DIR / ts / "scores.csv"),
+                     "summary": pd.read_csv(RESULTS_P2_DIR / ts / "summary.csv")})
+          for ts in ("train_a1_slice", "train_full")))
 same_inputs = all(set(map(tuple, g[["condition_id", "record_id"]].drop_duplicates().values.tolist()))
                   == set((c, r["record_id"]) for c, rows in condition_rows.items() for r in rows)
                   for _, g in per_record.groupby("tokenizer"))
@@ -813,7 +874,7 @@ check("Every noisy text generated once and shared by both tokenizers; manifests 
       same_inputs and hashes_ok)
 check("Empty-after-noise records kept, </s> scored, undefined rates flagged",
       (per_record["T"] >= 1).all() and (per_record[per_record.n_tokens == 0].rate_undefined).all()
-      and len(per_record) == 37 * 500 * 2 * 3)
+      and len(per_record) == 37 * 500 * 2 * len(MODELS))
 check("20 A1 diagnostic pairs reproduce byte-identically", pairs_identical)
 no_test = (not per_record.record_id.str.startswith("wt2-test").any()
            and not any(r["record_id"].startswith("wt2-test") for recs in train_sets.values() for r in recs))
@@ -824,6 +885,8 @@ check("§17: README reproduces a headline table; plotted points trace to saved C
       "phase2.ipynb" in readme and "summary.csv" in readme
       and all((FIG_DIR / n).exists() for n in ["loss_vs_rate_train_a1_slice.png", "severity.png", "corpus_size.png"])
       and summary_doc.exists() and "cannot" in summary_doc.read_text())
+check("Loss decomposition by target type adds up to the saved H (both training sets)",
+      max(dec_err_slice, dec_err_full) < 1e-9)
 check("Full unit-test suite passes", tests_pass)
 
 show_table(checks, title="Phase 2 acceptance checklist (plan §9)")
@@ -860,10 +923,11 @@ md(r"""
 | `derived/phase2/noisy/<condition_id>.jsonl` | 37 datasets: noisy text + full corruption manifest per record |
 | `results/phase2/grid_index.csv`, `severity.csv`, `severity_records.csv` | grid file hashes; requested p vs realized normalized MED |
 | `results/phase2/<train_set>/per_record.parquet` | one row per record × condition × tokenizer × model |
-| `results/phase2/<train_set>/scores.csv` | the 222 individual scores |
-| `results/phase2/<train_set>/summary.csv` | 6 clean + 72 noisy rows (mean/min/max over seeds) |
+| `results/phase2/<train_set>/scores.csv` | the 222 required scores + 74 supplementary trigram (q3) scores |
+| `results/phase2/<train_set>/summary.csv` | 6 clean + 72 noisy required rows + 2 + 24 q3 rows (mean/min/max over seeds) |
 | `results/phase2/<train_set>/within_pipeline.csv`, `context_benefit.csv`, `coverage.csv` | required §9 measures |
 | `results/phase2/<train_set>/vocab.csv`, `lambda_selection.csv`, `examples.md` | V and counts, λ search, error analysis |
+| `results/phase2/<train_set>/token_type_breakdown.csv` | P_mix loss split by target type (word, `##`, unknown, `</s>`) |
 | `results/phase2/corpus_size_comparison.csv`, `figures/*.png`, `run_info.json` | extension table, figures, hashes |
 | `evidence/phase2/*` | pytest output, acceptance checklist, hand check, MLE demo, fast-MED check, 20-pair regression |
 | `docs/phase2_summary.md` | Phase 2 write-up (interpretation, limitations, ethics) |

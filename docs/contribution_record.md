@@ -76,3 +76,6 @@
 - 2026-10-07: fast MED implemented with NumPy (no new dependency) and cross-checked against the
   Phase 1 reference; `matplotlib` added for figures.
 - 2026-10-07: the ACL paper v0.2 is deferred; findings recorded in `docs/phase2_summary.md`.
+- 2026-10-08: the add-one trigram q3 is scored as a supplementary standalone model in every output
+  (scores, summaries, context benefit, figures); the assignment's three configurations (q1, q2,
+  P_mix) and their counts (222 scores, 6 + 72 summary rows) are kept and checked separately.
