@@ -1,0 +1,8 @@
+967fd344fb0ad152cb7bea73b5031cef951165a2df5d9f404a349887f5ab289c  train_a1_slice.jsonl
+selection_rule: Assignment 1 slice, unchanged: first 500 train lines, non-empty, non-heading, 40-600 characters
+count: 500
+articles: 42
+characters: 167391
+whitespace_tokens: 31339
+source: derived/slice.jsonl
+role: primary baseline

@@ -32,3 +32,50 @@
   500-line train slice).
 - 2026-09-07: 20 pairs = first 20 slice examples; pair 0 is the intensity-0 control and the
   remaining 19 cycle through insertion / deletion / substitution at intensities 0.05 / 0.10 / 0.15.
+
+---
+
+# Phase 2 (Assignment 2) — Contribution Record
+
+## Samrat (Student A — extend pipeline)
+- Frozen validation sample + article IDs (`src/corpus/val_sample.py`, `src/corpus/articles.py`) — A1
+- Training sets `train_a1_slice` / `train_full` with checksums — A2
+- Noise rule v2 `a2_default` + replay (`src/noise/rule_v2.py`) — A3
+- 37-dataset noise grid + manifests (`src/noise/grid.py`) — A4
+- Fast MED cross-checked against the reference (`src/med/fast.py`) — A5
+- Coverage / fragmentation diagnostics (`src/eval/coverage.py`) — A6
+- `tests/test_noise_v2.py` — A8
+
+## Prazol (Student B — build engine)
+- Whitespace and WordPiece pipelines (`src/lm/tokenize.py`) — B1
+- Frozen vocabularies (`src/lm/vocab.py`) — B2
+- Sequence framing + sparse counts (`src/lm/counts.py`) — B3–B4
+- Add-one models, P_mix, unsmoothed MLE demo (`src/lm/models.py`) — B5
+- λ selection on clean validation (`src/lm/interp.py`) — B6
+- Scoring and loss aggregation (`src/lm/score.py`) — B7
+- `tests/test_lm.py` — B8
+
+## Shared
+- Step 0 freeze: `configs/phase2.yaml`, `src/phase2_config.py`, ID schemes
+- Verification: hand check, normalization on real engines, clean invariance, 20-pair regression
+- Grid runner, summaries, figures (`src/eval/run_grid.py`, `summarize.py`, `figures.py`), `tests/test_eval.py`
+- `phase2.ipynb` (built by `tools/build_phase2_notebook.py`), error analysis, corpus-size extension
+- `docs/phase2_summary.md`, acceptance checklist sign-off
+
+## Integration decisions log (Phase 2)
+- 2026-10-07: primary training set = the unchanged A1 500-line slice; full WikiText-2 train is a
+  separate corpus-size extension (λ re-selected per training set).
+- 2026-10-07: adopted the Assignment 2 default noise rule as `a2_default`; the A1 rule is kept only
+  to regenerate the 20 diagnostic pairs.
+- 2026-10-07: substitution excludes `source.lower()` so `A -> a` (erased by the uncased tokenizer)
+  is never chosen.
+- 2026-10-07: validation sample = first 500 validation lines passing the A1 line filter (40–600
+  chars), file order; article ID = line index of the governing ` = Title = ` heading.
+- 2026-10-07: λ tie-break = larger λ1, then larger λ2 (tolerance 1e-12 bits); λ written below the
+  frozen marker in `configs/phase2.yaml` and read back for all noisy scoring.
+- 2026-10-07: fast MED implemented with NumPy (no new dependency) and cross-checked against the
+  Phase 1 reference; `matplotlib` added for figures.
+- 2026-10-07: the ACL paper v0.2 is deferred; findings recorded in `docs/phase2_summary.md`.
+- 2026-10-08: the add-one trigram q3 is scored as a supplementary standalone model in every output
+  (scores, summaries, context benefit, figures); the assignment's three configurations (q1, q2,
+  P_mix) and their counts (222 scores, 6 + 72 summary rows) are kept and checked separately.

@@ -1,0 +1,72 @@
+# Phase 2 (Assignment 2) configuration — Step 0 shared freeze.
+# configs/config.yaml stays frozen as the Phase 1 record; everything Phase 2 reads lives here.
+# See docs/assignment/Phase-2/PHASE2_PLAN.md for the meaning of every field.
+#
+# Everything ABOVE the "FROZEN BY phase2.ipynb" marker is the experimental protocol; its
+# SHA-256 (`protocol_sha256`) is copied into every manifest and metric row. The block below
+# the marker is written by the notebook (λ selection, step B6) before any noisy scoring.
+
+phase: 2
+
+checkpoint: bert-base-uncased
+checkpoint_revision: 86b5e0934494bd15c9632b12f734a8a67f723594
+checkpoint_note: "course default google-bert/bert-base-uncased is the same Hub repo; revision pinned from Phase 1"
+
+corpus:
+  dataset: Salesforce/wikitext
+  config: wikitext-2-raw-v1
+  revision: b08601e04326c79dfdd32d625aee71d232d685c3
+
+article_rule: "a top-level heading line ' = Title = ' (exactly one '=' on each side) starts a new article; ' = = Sub = = ' does not"
+
+val_sample:
+  split: validation
+  rule: "validation lines in file order that, after strip(), are non-empty, not '= ...' headings, and 40-600 characters long; first 500"
+  min_chars: 40          # also the clean-record length cap for MED runtime (applied before corruption)
+  max_chars: 600
+  cap: 500
+
+training_sets:
+  train_a1_slice:
+    role: primary baseline
+    source: derived/slice.jsonl
+    rule: "Assignment 1 slice, unchanged: first 500 train lines, non-empty, non-heading, 40-600 characters"
+  train_full:
+    role: corpus-size extension
+    rule: "every train line that, after strip(), is non-empty and not a '= ...' heading (no length band, no cap)"
+
+noise:
+  rule_version: a2_default
+  operations: [insertion, deletion, substitution]
+  rates: [0.01, 0.05, 0.10, 0.20]          # p = 0 is the single shared clean dataset
+  seeds: [11, 23, 47]
+  alphabet: "abcdefghijklmnopqrstuvwxyz"   # inserted / substituted characters (lowercase a-z)
+  eligible: "ASCII letters a-z and A-Z in the original string"
+  protected_spans: ["@-@", "@,@", "@.@"]   # WikiText sentinels; contain no letters, listed explicitly anyway
+  substitution_excludes: "source.lower()"  # 'A' -> 'a' is never chosen (the uncased tokenizer would erase it)
+  rng_key: "example_seed(seed, f'{record_id}|{op}|{p}')"
+
+lm:
+  tokenizers: [whitespace, wordpiece]
+  models: [q1, q2, p_mix]                 # the assignment's three configurations
+  supplementary_models: [q3]               # standalone add-one trigram, scored and reported alongside (team decision)
+  start_symbol: "<s>"                      # context only: never in V, never scored
+  end_symbol: "</s>"
+  whitespace_unk: "<UNK>"
+  whitespace_min_count: 2
+  wordpiece_excluded: ["[PAD]", "[CLS]", "[SEP]", "[MASK]", "[unused*]"]
+  lambda_step: 0.25
+  lambda_tie_break: "among losses within tie_tolerance of the minimum, prefer larger lambda1, then larger lambda2 (simpler model wins)"
+  lambda_tie_tolerance: 1.0e-12
+
+pairs_regression:
+  description: "the 20 Assignment 1 diagnostic pairs, regenerated with the A1 rule and diffed against evidence/pairs/pairs.jsonl"
+
+# === FROZEN BY phase2.ipynb (step B6) — do not edit by hand ===
+frozen_lambdas:
+  train_a1_slice:
+    whitespace: [1.0, 0.0, 0.0]
+    wordpiece: [1.0, 0.0, 0.0]
+  train_full:
+    whitespace: [0.75, 0.25, 0.0]
+    wordpiece: [0.5, 0.5, 0.0]

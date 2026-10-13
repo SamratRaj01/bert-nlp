@@ -1,0 +1,3 @@
+tokenizer,|V|,training_types,training_tokens,types_kept,types_mapped_to_unk,training_tokens_mapped_to_unk,records,targets,distinct_unigrams,distinct_bigrams,distinct_trigrams,distinct_bigram_histories,distinct_trigram_histories,bert_vocab_entries,excluded,excluded_unused
+whitespace,2918,6806.0,31339,2916.0,3890.0,3890,500,31839,2918,16436,25782,2918,16385,,,
+wordpiece,29525,,35142,,,0,500,35642,6568,22993,31280,6568,22932,30522.0,998.0,994.0

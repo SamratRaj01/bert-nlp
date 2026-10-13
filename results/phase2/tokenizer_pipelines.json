@@ -1,0 +1,24 @@
+{
+  "whitespace": {
+    "tokenizer": "whitespace",
+    "implementation": "str.split() (Python)",
+    "casing": "preserved",
+    "accents": "preserved",
+    "punctuation": "kept attached to neighbouring characters unless space-separated"
+  },
+  "wordpiece": {
+    "tokenizer": "wordpiece",
+    "checkpoint": "bert-base-uncased",
+    "revision": "86b5e0934494bd15c9632b12f734a8a67f723594",
+    "class": "BertTokenizer",
+    "is_fast": true,
+    "casing": "lowercased",
+    "accents": "stripped (uncased BERT normalizer)",
+    "punctuation": "split into separate pieces by the BERT pre-tokenizer",
+    "special_tokens_added": false,
+    "truncation": false,
+    "vocab_entries": 30522,
+    "transformers": "5.16.1",
+    "tokenizers": "0.23.2"
+  }
+}

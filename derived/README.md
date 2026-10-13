@@ -18,3 +18,10 @@ checksum, corruption manifest, and baseline without executing anything.
 ## Rules
 - Nothing here is hand-edited. If a file looks wrong, fix the code and rerun.
 - These files are reproducible from `raw/` + `configs/config.yaml` + the fixed seed.
+
+## Phase 2 (`derived/phase2/`, written by `phase2.ipynb`)
+| File | Produced by | Contents |
+|---|---|---|
+| `val_sample.jsonl` (+ `.sha256`) | `src.corpus.val_sample` | 500 frozen validation records with article IDs |
+| `train_a1_slice.jsonl`, `train_full.jsonl` (+ `.sha256`) | `src.corpus.val_sample` | the two clean training sets |
+| `noisy/<condition_id>.jsonl` | `src.noise.grid` | 37 datasets (clean + 36 noisy); each row = noisy text + full corruption manifest |
