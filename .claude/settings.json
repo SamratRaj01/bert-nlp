@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 -I -c \"import json;d=json.load\\(open\\('/tmp/d.json'\\)\\);print\\(list\\(d['sev']\\)[:5]\\);print\\(d['cov']['whitespace|insertion']\\)\")",
+      "Bash(sed -i '' 's#\\(s^=s>>>16\\)/4294967296#\\(\\(s^=s>>>16\\)>>>0\\)/4294967296#' t.html phase2_atlas.html)",
+      "Bash(node -e ' *)",
+      "Bash(python3 -I -c ' *)",
+      "Bash(rm -rf s)",
+      "Bash(python3 -c \"import zipfile; zipfile.ZipFile\\('/Users/samratrajsharma/Documents/School/Sem-3/NLP/Bert-Project/deck-sample.pptx'\\).extractall\\('s'\\)\")",
+      "Bash(python3 -c ' *)",
+      "Bash(grep -o 'y=\"6355080\".\\\\{0,600\\\\}' slides/slide2.xml)",
+      "Read(//Users/samratrajsharma/Documents/School/Sem-3/NLP/**)"
+    ]
+  }
+}
