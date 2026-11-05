@@ -16,3 +16,6 @@ jupyter>=1.0
 nbformat>=5.9
 nbconvert>=7.0
 ipykernel>=6.29
+# Assignment 3 / Workstream A: read the embedding table out of the pinned checkpoint
+safetensors>=0.4
+huggingface_hub>=0.23

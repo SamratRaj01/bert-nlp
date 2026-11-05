@@ -94,6 +94,25 @@ files. The corpus-size comparison is `results/phase2/corpus_size_comparison.csv`
 
 Phase 2 also needs `matplotlib` (in `requirements.txt`).
 
+## Assignment 3, Workstream A (vector drift) — run order
+
+```
+.venv/Scripts/python noise_vector_drift.py     # ~30 s; writes results/phase3/vector_drift/
+.venv/Scripts/python -m src.drift.figures      # geometry_vs_rate.png from the saved CSVs
+.venv/Scripts/python -m pytest tests/test_drift.py
+```
+
+Needs `safetensors` and `huggingface_hub` on top of `requirements.txt`; torch is not needed. The
+first run copies the frozen embedding table `E` (30522 x 768) out of the pinned checkpoint
+(one ~440 MB download) into `derived/phase3/E_bert-base-uncased.npy`; that file is git-ignored and
+checked against the tracked `.sha256` on every load.
+
+It selects the first 1,000 letter-containing whitespace spans of the saved validation sample (22
+records), pairs each with its noisy counterpart from the Assignment 2 edit logs (no noise is
+regenerated), mean-pools raw `E` rows per span (no special tokens), and reports cosine and raw
+Euclidean distance for all 37 conditions. Empty or zero-norm pairs are counted as undefined, never
+imputed. These are preliminary validation results; vector drift does not measure meaning.
+
 ## Ethics
 
 Character noise is dual-use. This is a BERT encoder study, not a prompt-injection exercise.

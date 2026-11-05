@@ -1,0 +1,35 @@
+{
+  "workstream": "Assignment 3 / A: vector drift",
+  "label": "preliminary validation results",
+  "checkpoint": "bert-base-uncased",
+  "checkpoint_revision": "86b5e0934494bd15c9632b12f734a8a67f723594",
+  "vocab_size": 30522,
+  "embedding_shape": [
+    30522,
+    768
+  ],
+  "E_sha256": "fe2ec1126e7097f076a77a63212aafc7302a7ad18ce2f6a9060272d2374b4ba0",
+  "tokenization": "per span, add_special_tokens=False; raw E rows mean-pooled in float64",
+  "val_sample_sha256": "4894ff5d0baf2805ef6c0c5ee85579a0139ffb789c77c01fdecdb056c4548a7b",
+  "protocol_sha256": "a2df71c67dcb31fdfadf08958af89bfae314c814509ef2994cc7d2655eccf000",
+  "selected_spans_sha256": "5cb33e0b2bac19236bb1a746c6d9566f0ffe2c9f80858415dbfa2bedfbb8176b",
+  "spans_selected": 1000,
+  "records_covered": 22,
+  "conditions": 37,
+  "span_audit_rows": 37000,
+  "denominators": {
+    "coverage": "valid / selected",
+    "mean_cosine, mean_euclidean": "over valid pairs only",
+    "pieces_per_clean_span": "total clean pieces / selected spans",
+    "pieces_per_noisy_span": "total noisy pieces / selected spans (emptied span = 0)",
+    "unk_rate": "noisy [UNK] pieces / noisy pieces",
+    "mean_span_med": "mean unit-cost edit distance of span text, over selected spans",
+    "changed_span_fraction": "spans with noisy text != clean text / selected spans"
+  },
+  "env": {
+    "python": "3.13.1",
+    "numpy": "2.5.4",
+    "transformers": "5.22.1",
+    "tokenizers": "0.23.3"
+  }
+}
