@@ -82,3 +82,6 @@ docs/vocab.txt
 # Hugging Face / datasets local caches, if ever pointed at the project
 hf_cache/
 .huggingface/
+
+# Assignment 3: frozen embedding table copy (94 MB); its .sha256 sidecar is tracked
+derived/phase3/*.npy
