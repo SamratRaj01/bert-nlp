@@ -1,0 +1,66 @@
+{
+  "label": "preliminary validation results",
+  "K_outputs": 29525,
+  "vocab_stats": {
+    "bert_vocab_entries": 30522,
+    "excluded": 998,
+    "excluded_unused": 994
+  },
+  "settings": {
+    "train_set": "train_a1_slice",
+    "context_tokens": 2,
+    "bos_vector": "zeros",
+    "eos": "</s>",
+    "hidden_size": 64,
+    "optimizer": "adam",
+    "learning_rate": 0.001,
+    "batch_size": 128,
+    "max_epochs": 5,
+    "seed": 101,
+    "dropout": 0.0,
+    "weight_decay": 0.0,
+    "loss": "CrossEntropyLoss on raw logits (no softmax first)",
+    "selection": "lowest clean-validation loss after each epoch; an exact tie keeps the earlier epoch",
+    "device": "cpu",
+    "torch_threads": 1,
+    "deterministic_algorithms": true,
+    "eval_chunk": 1024,
+    "control": {
+      "source": "results/phase2/train_a1_slice/scores.csv",
+      "tokenizer": "wordpiece",
+      "model": "p_mix"
+    }
+  },
+  "models": {
+    "mean": {
+      "best_epoch": 2,
+      "untrained_val_loss": 10.297462764161068,
+      "trainable": 1968341,
+      "frozen": 23440896
+    },
+    "concat": {
+      "best_epoch": 2,
+      "untrained_val_loss": 10.288586180706755,
+      "trainable": 2017493,
+      "frozen": 23440896
+    }
+  },
+  "E_sha256_before": "ca6b51539e1d8c14f11e946a2e6f87a2f547aa0f8d17c15f1c92299d51cd8105",
+  "E_sha256_after": "ca6b51539e1d8c14f11e946a2e6f87a2f547aa0f8d17c15f1c92299d51cd8105",
+  "E_unchanged": true,
+  "tokenizer": {
+    "checkpoint": "bert-base-uncased",
+    "revision": "86b5e0934494bd15c9632b12f734a8a67f723594",
+    "vocab_entries": 30522
+  },
+  "parity_with_assignment2": true,
+  "python": "3.13.11",
+  "torch": "2.15.0",
+  "numpy": "2.5.3",
+  "pandas": "3.0.5",
+  "transformers": "5.16.1",
+  "device": "cpu",
+  "torch_threads": 1,
+  "deterministic_algorithms": true,
+  "note": "a fixed seed does not guarantee identical results on different hardware"
+}

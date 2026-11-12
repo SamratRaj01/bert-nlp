@@ -1,0 +1,51 @@
+# Phase 3 (Assignment 3) configuration — geometry workstream (Student A) first.
+# Everything the noise grid, validation sample and tokenizer need is INHERITED from
+# configs/phase2.yaml (same records, same noisy files, same checkpoint revision). This file only
+# records what is new in Phase 3. See docs/assignment/Phase-3/PHASE3_PLAN.md.
+
+phase: 3
+label: "preliminary validation results"   # test split stays sealed until the frozen final evaluation
+
+inherits: configs/phase2.yaml             # noise grid, val_sample rule, tokenizer checkpoint + revision
+
+embedding:
+  checkpoint: bert-base-uncased           # same Hub repo as google-bert/bert-base-uncased
+  revision: 86b5e0934494bd15c9632b12f734a8a67f723594
+  weights_file: model.safetensors
+  tensor_name: bert.embeddings.word_embeddings.weight   # BERT's token-embedding table ONLY (no position/segment/LayerNorm)
+  expected_shape: [30522, 768]
+  dtype: float32
+  frozen: true                            # never rescaled, never trained; hash checked before/after
+
+geometry:
+  span_cap: 1000                          # first up-to-1,000 eligible clean spans, saved record order
+  span_rule: "nonempty whitespace-delimited spans (regex \\S+) containing >=1 eligible ASCII letter"
+  special_tokens_added: false             # tokenize each span alone, no [CLS]/[SEP]
+  pooling: mean_of_raw_rows               # average of E[token_id] rows, no normalisation
+  undefined_rule: "empty span or zero-norm pooled vector -> pair is undefined (never scored as 0)"
+  identity_tolerance: 1.0e-6              # p=0: cosine == 1 and distance == 0 within this tolerance
+
+# ---- Workstream B: neural next-token models (Assignment 3 §9-§14) ----------------------------------
+neural:
+  train_set: train_a1_slice               # same 500 clean training records as Assignment 2
+  context_tokens: 2                        # the two immediately preceding tokens
+  bos_vector: zeros                        # BOS is an input-only all-zero vector (no new row in the BERT table)
+  eos: "</s>"                              # output-only end-of-record target, same output set as Assignment 2
+  hidden_size: 64
+  optimizer: adam
+  learning_rate: 0.001
+  batch_size: 128
+  max_epochs: 5
+  seed: 101
+  dropout: 0.0
+  weight_decay: 0.0
+  loss: "CrossEntropyLoss on raw logits (no softmax first)"
+  selection: "lowest clean-validation loss after each epoch; an exact tie keeps the earlier epoch"
+  device: cpu
+  torch_threads: 1                         # fixed for reproducibility; recorded in the run info
+  deterministic_algorithms: true
+  eval_chunk: 1024                         # targets per scoring batch (memory only, no effect on results)
+  control:                                 # the 37-row Assignment 2 n-gram control, kept separate
+    source: results/phase2/train_a1_slice/scores.csv
+    tokenizer: wordpiece
+    model: p_mix

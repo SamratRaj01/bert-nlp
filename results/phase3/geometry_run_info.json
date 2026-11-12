@@ -1,0 +1,23 @@
+{
+  "label": "preliminary validation results",
+  "checkpoint": "bert-base-uncased",
+  "revision": "86b5e0934494bd15c9632b12f734a8a67f723594",
+  "E_shape": [
+    30522,
+    768
+  ],
+  "E_sha256": "ca6b51539e1d8c14f11e946a2e6f87a2f547aa0f8d17c15f1c92299d51cd8105",
+  "E_unchanged_after_run": true,
+  "spans_selected": 1000,
+  "records_covered": 22,
+  "conditions": 37,
+  "pairs": 37000,
+  "valid_pairs": 36938,
+  "undefined_pairs": 62,
+  "identity_check_passed": true,
+  "python": "3.13.11",
+  "numpy": "2.5.3",
+  "pandas": "3.0.5",
+  "transformers": "5.16.1",
+  "device": "cpu (numpy only, no GPU)"
+}
